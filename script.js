@@ -1,9 +1,6 @@
 var data, table,countryList,prevLocation;
 window.onload = ()=>{
 
-
-   
-
     var searchInput = document.getElementById("search-textbox");
     table = document.getElementById('GlobalData');
     var specificData = document.getElementById('table');
