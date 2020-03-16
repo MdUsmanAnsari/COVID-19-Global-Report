@@ -64,28 +64,19 @@ window.onload = ()=>{
 
 
     function getTotalConfirmed(data,cityName){
-        let sum = 0 
-        data[cityName].forEach( element =>{
-            sum += element.confirmed;
-        });
-        return sum;
+       
+        return (data[cityName][data[cityName].length-1].confirmed);
+    
     }
 
     function getTotalDeaths(data,cityName){
-        let sum = 0 
-        data[cityName].forEach( element =>{
-            sum += element.deaths;
-        });
-        return sum;
+    
+        return (data[cityName][data[cityName].length-1].deaths);
     }
 
 
     function getTotalRecovered(data,cityName){
-        let sum = 0 
-        data[cityName].forEach( element =>{
-            sum += element.recovered;
-        });
-        return sum;
+        return (data[cityName][data[cityName].length-1].recovered);
     }
 
     function search(country){
