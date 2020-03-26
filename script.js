@@ -1,6 +1,7 @@
 var data, table,countryList,prevLocation;
 window.onload = ()=>{
 
+
     var searchInput = document.getElementById("search-textbox");
     table = document.getElementById('GlobalData');
     var specificData = document.getElementById('table');
@@ -33,8 +34,7 @@ window.onload = ()=>{
         this.data = data;
 
         for (x in data) {
-            table.innerHTML +=  UICotainer(data,x);
-
+            table.innerHTML +=  UICotainer(x);
         }
 
     })
@@ -60,20 +60,30 @@ window.onload = ()=>{
      }
 
 
-    function getTotalConfirmed(data,cityName){
-       
-        return (data[cityName][data[cityName].length-1].confirmed);
     
-    }
+    function getTotal(data, cityName){
 
-    function getTotalDeaths(data,cityName){
-    
-        return (data[cityName][data[cityName].length-1].deaths);
-    }
+        let recoveredValue = 0 , deathValue = 0 , confirmValue = 0;
 
+        data[cityName].forEach(value => {
 
-    function getTotalRecovered(data,cityName){
-        return (data[cityName][data[cityName].length-1].recovered);
+            if(value.recovered !==null)
+                recoveredValue = value.recovered;
+
+            if(value.deaths !==null)
+                deathValue = value.deaths;
+
+            if(value.confirmed !==null)
+                  confirmValue = value.confirmed;
+
+        });
+
+        return {
+            confirmed:confirmValue,
+            deaths:deathValue,
+            recover:recoveredValue
+        }
+
     }
 
     function search(country){
@@ -81,7 +91,7 @@ window.onload = ()=>{
         var regexp = new RegExp('^'+country.toLowerCase()+'.*$');
         for(x in data){
             if (x.toLowerCase().match(regexp)) { 
-                results += UICotainer(data,x);
+                results += UICotainer(x);
             }
         }
         table.innerHTML = results;
@@ -92,21 +102,23 @@ window.onload = ()=>{
     }
 
 
-    function UICotainer(date,x){
+    function UICotainer(x){
+
+        casesData = getTotal(this.data,x);
 
         return  `<div class="country__item">
                     <h1 class="country__name">${getNameCountary(x)}</h1>
                     <div class="country__item__data">
                         <div class="country__item__data__item">
-                            <h1 class="country__text-1">${getTotalConfirmed(this.data,x)}</h1>
+                            <h1 class="country__text-1">${casesData.confirmed}</h1>
                             <h1 class="country__text-1">Confirmed</h1>
                         </div>
                         <div class="country__item__data__item">
-                            <h1 class="country__text-1">${getTotalDeaths(this.data,x)}</h1>
+                            <h1 class="country__text-1">${casesData.deaths}</h1>
                             <h1 class="country__text-1">Deaths</h1>
                         </div>
                         <div class="country__item__data__item">
-                            <h1 class="country__text-1">${getTotalRecovered(this.data,x)}</h1>
+                            <h1 class="country__text-1">${casesData.recover}</h1>
                             <h1 class="country__text-1">Recovered</h1>
                         </div>
                     </div>
@@ -121,10 +133,7 @@ window.onload = ()=>{
 
                 countryList.forEach(element => {
             
-                    element.addEventListener('click',(event)=>{
-
-                       
-                                           
+                    element.addEventListener('click',(event)=>{  
                         document.getElementById('innerPageToatalAlys--confirm').innerHTML = element.children[1].children[0].children[0].textContent ;
                         document.getElementById('innerPageToatalAlys--deaths').innerHTML = element.children[1].children[1].children[0].textContent ;
                         document.getElementById('innerPageToatalAlys--recover').innerHTML = element.children[1].children[2].children[0].textContent ;
