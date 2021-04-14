@@ -1,128 +1,132 @@
+let allCasesData = 0;
+let prevLocation = 0;
+const searchInput = document.getElementById("search-textbox");
+const table = document.getElementById("GlobalData");
+const specificData = document.getElementById("table");
+const previousBtn = document.querySelector(".previou-btn i");
+const allDataPage = document.querySelector("main");
+const tablePage = document.querySelector(".section-country-wise");
+const nameOfCountey = document.querySelector(".code-title--sec--1");
+tablePage.classList.toggle("section-country-wise--deactive");
+allDataPage.classList.toggle("main-deactive");
+const listItem = document.getElementsByClassName("country__item");
 
-    let allCasesData = 0 ;
-    let isFetchingFailed = false;
-    let prevLocation = 0 ;
+const getData = async () => {
+  try {
+    const result = await fetch(
+      "https://pomber.github.io/covid19/timeseries.json"
+    );
+    const data = await result.json();
+    console.log(data);
 
-    const getData = async () => {
-        try{
-            const result = await fetch('https://pomber.github.io/covid19/timeseries.json');
-            return await result.json();
-        }catch(err){
-            alert('Something went wrong try again later');
-            isFetchingFailed = true;
-        }
+    allDataPage.classList.toggle("main-deactive");
+    allCasesData = data;
+    for (country in data) {
+      const html = getUIString(country);
+      table.insertAdjacentHTML("beforeend", html);
     }
 
-    const searchInput = document.getElementById("search-textbox");
-    const table = document.getElementById('GlobalData');
-    const specificData = document.getElementById('table');
-    const previousBtn = document.querySelector('.previou-btn i');
-    const allDataPage = document.querySelector('main');
-    const tablePage =document.querySelector('.section-country-wise');
-    const nameOfCountey = document.querySelector('.code-title--sec--1');
-    tablePage.classList.toggle('section-country-wise--deactive');
-    allDataPage.classList.toggle('main-deactive');
-    const listItem = document.getElementsByClassName('country__item');
-
-
-    getData().then( data =>{
-
-                if(!isFetchingFailed){
-                   document.querySelector('.loader').remove();
-                }
-
-                allDataPage.classList.toggle('main-deactive');
-                allCasesData =  data;
-                for(country in data){
-                    const html =  getUIString(country);
-                    table.insertAdjacentHTML('beforeend',html);
-                }
-
-                for (let element of listItem){
-                    element.addEventListener('click',getDataSpecificData.bind(this,element.children[0].textContent));
-                }
-    });
-
-
-
-    const getTotal = (data, cityName) => {
-        const lastIndex =  data[cityName].length-1;
-        return {
-            confirmed: data[cityName][lastIndex].confirmed,
-            deaths:data[cityName][lastIndex].deaths,
-            recover:data[cityName][lastIndex].recovered,
-        }
+    for (let element of listItem) {
+      element.addEventListener(
+        "click",
+        getDataSpecificData.bind(this, element.children[0].textContent)
+      );
     }
+  } catch (err) {
+    document.body.innerHTML = `<div class="not-found">
+                                <h1>Something went wrong try again later</h1>
+                              </div>`;
+  } finally {
+    document.querySelector(".loader").remove();
+  }
+};
 
-    
-    const getUIString  = (country) => {
-         
-        const totalCases =  getTotal(allCasesData , country);
+const getTotal = (data, cityName) => {
+  const lastIndex = data[cityName].length - 1;
+  return {
+    confirmed: data[cityName][lastIndex].confirmed,
+    deaths: data[cityName][lastIndex].deaths,
+    recover: data[cityName][lastIndex].recovered,
+  };
+};
 
-        return ` <div class="country__item">
+const getUIString = (country) => {
+  const totalCases = getTotal(allCasesData, country);
+
+  return ` <div class="country__item">
                                     <span class="code-title--sec--fullName" style="display:none">${country}</span>
-                                    <h1 class="country__name">${getModifiedCountryName(country)}</h1>
+                                    <h1 class="country__name">${getModifiedCountryName(
+                                      country
+                                    )}</h1>
                                     <div class="country__item__data">
                                         <div class="country__item__data__item">
-                                            <h1 class="country__text-1">${totalCases.confirmed}</h1>
+                                            <h1 class="country__text-1">${
+                                              totalCases.confirmed
+                                            }</h1>
                                             <h1 class="country__text-1">Confirmed</h1>
                                         </div>
                                         <div class="country__item__data__item">
-                                            <h1 class="country__text-1">${totalCases.deaths}</h1>
+                                            <h1 class="country__text-1">${
+                                              totalCases.deaths
+                                            }</h1>
                                             <h1 class="country__text-1">Deaths</h1>
                                         </div>
                                         <div class="country__item__data__item">
-                                            <h1 class="country__text-1">${totalCases.recover}</h1>
+                                            <h1 class="country__text-1">${
+                                              totalCases.recover
+                                            }</h1>
                                             <h1 class="country__text-1">Recovered</h1>
                                         </div>
                                         <span class="country__name--full">India</span>
                                     </div>
-                </div>`
+                </div>`;
+};
+
+searchInput.addEventListener("keyup", function (event) {
+  event.preventDefault();
+  search(searchInput.value);
+});
+
+function search(country) {
+  let results = "";
+  let regexp = new RegExp("^" + country.toLowerCase() + ".*$");
+  for (x in allCasesData) {
+    if (x.toLowerCase().match(regexp)) {
+      results += getUIString(x);
     }
+  }
+  table.innerHTML = results;
+  for (let element of listItem) {
+    element.addEventListener(
+      "click",
+      getDataSpecificData.bind(this, element.children[0].textContent)
+    );
+  }
+}
 
-    searchInput.addEventListener("keyup", function(event) {
-                event.preventDefault();
-                search(searchInput.value);
-     });
+const getDataSpecificData = (cityName) => {
+  prevLocation = window.scrollY;
 
-     
-    function search(country){
-                let results="";
-                let regexp = new RegExp('^'+country.toLowerCase()+'.*$');
-                for(x in allCasesData){
-                    if (x.toLowerCase().match(regexp)) { 
-                        results += getUIString(x);
-                    }
-                }
-                table.innerHTML = results;
-                for (let element of listItem){
-                    element.addEventListener('click',getDataSpecificData.bind(this,element.children[0].textContent));
-                }
-                    
-    }
-        
-   
-    const getDataSpecificData = (cityName) =>{
+  window.scroll({
+    top: 0,
+    left: 0,
+    behavior: "smooth",
+  });
 
-        prevLocation = window.scrollY;
+  console.log(prevLocation);
 
-        window.scroll({
-            top: 0,
-            left: 0,
-            behavior: 'smooth'
-       });
+  allDataPage.classList.toggle("main-deactive");
+  tablePage.classList.toggle("section-country-wise--deactive");
+  nameOfCountey.innerHTML = cityName;
+  const totalCases = getTotal(allCasesData, cityName);
+  document.getElementById("innerPageToatalAlys--confirm").innerHTML =
+    totalCases.confirmed;
+  document.getElementById("innerPageToatalAlys--deaths").innerHTML =
+    totalCases.deaths;
+  document.getElementById("innerPageToatalAlys--recover").innerHTML =
+    totalCases.recover;
 
-       console.log(prevLocation)
-            
-        allDataPage.classList.toggle('main-deactive');
-        tablePage.classList.toggle('section-country-wise--deactive');
-        nameOfCountey.innerHTML = cityName;
-        const totalCases =  getTotal(allCasesData , cityName);
-        document.getElementById('innerPageToatalAlys--confirm').innerHTML = totalCases.confirmed;
-        document.getElementById('innerPageToatalAlys--deaths').innerHTML = totalCases.deaths;
-        document.getElementById('innerPageToatalAlys--recover').innerHTML = totalCases.recover;
-
-        specificData.innerHTML=`
+  specificData.innerHTML = `
                                 <div class="specfic-List__grid">
                                 <div class="specfic-List__item">Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
                                 <div class="specfic-List__item">Confirmed</div>
@@ -130,45 +134,53 @@
                                 <div class="specfic-List__item">Recovered</div>
                             </div>
                         `;
-        
-        for( x of allCasesData[cityName]){
 
-            specificData.innerHTML +=`  <div class="specfic-List__grid">
-                                        <div class="specfic-List__item">${getDate(x.date)}</div>
-                                        <div class="specfic-List__item">${x.confirmed}</div>
-                                        <div class="specfic-List__item">${x.deaths}</div>
-                                        <div class="specfic-List__item">${x.recovered}</div>
+  for (x of allCasesData[cityName]) {
+    specificData.innerHTML += `  <div class="specfic-List__grid">
+                                        <div class="specfic-List__item">${getDate(
+                                          x.date
+                                        )}</div>
+                                        <div class="specfic-List__item">${
+                                          x.confirmed
+                                        }</div>
+                                        <div class="specfic-List__item">${
+                                          x.deaths
+                                        }</div>
+                                        <div class="specfic-List__item">${
+                                          x.recovered
+                                        }</div>
                                         </div>
-                                        `
-      }
-}
+                                        `;
+  }
+};
 
+const getModifiedCountryName = (str) => {
+  let cityName = str;
+  if (str.length > 12) cityName = str.slice(0, 12);
+  return cityName + "..";
+};
 
-const getModifiedCountryName = str => {
-        let cityName = str;
-        if(str.length > 12)
-              cityName = str.slice(0 , 12);
-         return cityName + '..';
-}
-    
-    
+const getDate = (date) => {
+  const d = new Date(date);
+  const dtf = new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+  const [{ value: mo }, , { value: da }, , { value: ye }] = dtf.formatToParts(
+    d
+  );
+  return "" + da + "-" + mo + "-" + ye;
+};
 
-const getDate = date => {
-        const d = new Date(date)
-        const dtf = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' }) 
-        const [{ value: mo },,{ value: da },,{ value: ye }] = dtf.formatToParts(d) 
-        return ''+da+'-'+mo+'-'+ye;
-
-}
-
-previousBtn.addEventListener('click',()=>{
-    allDataPage.classList.toggle('main-deactive');
-    tablePage.classList.toggle('section-country-wise--deactive');
-    window.scroll({
-        top: prevLocation,
-        left: 0,
-        behavior: 'smooth'
-   });
+previousBtn.addEventListener("click", () => {
+  allDataPage.classList.toggle("main-deactive");
+  tablePage.classList.toggle("section-country-wise--deactive");
+  window.scroll({
+    top: prevLocation,
+    left: 0,
+    behavior: "smooth",
+  });
 });
 
-    
+getData();
