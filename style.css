@@ -163,6 +163,7 @@ body {
   border-radius: 5px;
   overflow: hidden;
   padding-bottom: 1rem;
+  cursor: pointer;
 }
 
 .country__name {
@@ -199,6 +200,7 @@ body {
 .country__item__data__item {
   text-align: center;
   line-height: 2rem;
+
 }
 
 .country__item__data__item:not(:last-of-type) {
