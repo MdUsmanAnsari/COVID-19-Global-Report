@@ -17,20 +17,12 @@ const getData = async () => {
       "https://pomber.github.io/covid19/timeseries.json"
     );
     const data = await result.json();
-    console.log(data);
 
     allDataPage.classList.toggle("main-deactive");
     allCasesData = data;
     for (country in data) {
       const html = getUIString(country);
       table.insertAdjacentHTML("beforeend", html);
-    }
-
-    for (let element of listItem) {
-      element.addEventListener(
-        "click",
-        getDataSpecificData.bind(this, element.children[0].textContent)
-      );
     }
   } catch (err) {
     document.body.innerHTML = `<div class="not-found">
@@ -53,7 +45,8 @@ const getTotal = (data, cityName) => {
 const getUIString = (country) => {
   const totalCases = getTotal(allCasesData, country);
 
-  return ` <div class="country__item">
+
+  return ` <div class="country__item" data-country="${country}">
                                     <span class="code-title--sec--fullName" style="display:none">${country}</span>
                                     <h1 class="country__name">${getModifiedCountryName(
                                       country
@@ -96,15 +89,10 @@ function search(country) {
     }
   }
   table.innerHTML = results;
-  for (let element of listItem) {
-    element.addEventListener(
-      "click",
-      getDataSpecificData.bind(this, element.children[0].textContent)
-    );
-  }
 }
 
 const getDataSpecificData = (cityName) => {
+
   prevLocation = window.scrollY;
 
   window.scroll({
@@ -112,8 +100,6 @@ const getDataSpecificData = (cityName) => {
     left: 0,
     behavior: "smooth",
   });
-
-  console.log(prevLocation);
 
   allDataPage.classList.toggle("main-deactive");
   tablePage.classList.toggle("section-country-wise--deactive");
@@ -182,5 +168,14 @@ previousBtn.addEventListener("click", () => {
     behavior: "smooth",
   });
 });
+
+
+table.addEventListener('click',(event)=>{
+  
+  const target = event.target.closest('.country__item');
+  if(target){
+      getDataSpecificData(target.getAttribute('data-country'))
+  }
+})
 
 getData();
